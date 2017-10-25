@@ -1,8 +1,27 @@
 @type-area-line-height: 20px;
 
-.section {
-  width: 20%;
-  margin: 50px auto 0;
+// mobile screen
+@media only screen and (max-width: 768px) {
+  .grid-container {
+    width: 100%;
+  }
+}
+
+// desktop screen
+@media only screen and (min-width: 769px) {
+  .grid-container {
+    margin: 0 auto;
+    width: 60%;
+    display: grid;
+    grid-template-columns: 0.5fr 0.5fr;
+    grid-template-rows: auto;
+    grid-template-areas: "creation result"
+                         "creation result"
+                         "search result"
+                         "search result";
+    grid-column-gap: 10px;
+    grid-row-gap: 15px;
+  }
 }
 
 .section-title {
@@ -22,4 +41,22 @@
   line-height: @type-area-line-height;
   height: @type-area-line-height*10;
   box-sizing: border-box;
+}
+
+.word-creation {
+  grid-area: creation;
+}
+
+.wanna-search {
+  grid-area: search;
+}
+
+.result {
+  grid-area: result;
+
+  .section-content {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    white-space: pre;
+  }
 }

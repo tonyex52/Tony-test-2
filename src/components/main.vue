@@ -1,15 +1,21 @@
 <template>
-  <div>
-    <div class="section">
+  <div class="grid-container">
+    <div class="word-creation">
       <div class="section-title">Word Creation</div>
       <div class="section-content">
-        <textarea class="type-area" v-default-value="'123'" v-model="wordCreation" placeholder="type single|multiple words which wanna be searched (make sure that you use the LF between words)"></textarea>
+        <textarea class="type-area" v-default-value="'ASADB\nABCCED\nABCF'" v-model="wordCreation" placeholder="type single|multiple words which wanna be searched (make sure that you use the LF between words)"></textarea>
       </div>
     </div>
-    <div class="section">
-      <div class="section-title">Wanna Search <label class="label-text"><input type="checkbox" name="case-sensitive" v-model="isCaseSensitive"> Case Sensitive</label></div>
+    <div class="wanna-search">
+      <div class="section-title">Wanna Search <label class="label-text"><input type="checkbox" name="case-sensitive" v-model="isCaseSensitive">Case Sensitive</label></div>
       <div class="section-content">
-        <textarea class="type-area" v-default-value="'123\n456\n789'" v-model="wannaSearch" placeholder="type single|multiple words you wanna search (make sure that you use the LF between words)"></textarea>
+        <textarea class="type-area" v-default-value="'ABCE\nSFCS\nADEE'" v-model="wannaSearch" placeholder="type single|multiple words you wanna search (make sure that you use the LF between words)"></textarea>
+      </div>
+    </div>
+    <div class="result">
+      <div class="section-title">result</div>
+      <div class="section-content">
+
       </div>
     </div>
   </div>
