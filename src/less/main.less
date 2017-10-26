@@ -1,16 +1,9 @@
 @type-area-line-height: 20px;
 
-// mobile screen
-@media only screen and (max-width: 768px) {
-  .grid-container {
-    width: 100%;
-  }
-}
-
 // desktop screen
 @media only screen and (min-width: 769px) {
   .grid-container {
-    margin: 0 auto;
+    margin: 50px auto;
     width: 60%;
     display: grid;
     grid-template-columns: 0.5fr 0.5fr;
@@ -24,10 +17,34 @@
   }
 }
 
+// mobile screen
+@media only screen and (max-width: 768px) {
+  .grid-container {
+    width: 90%;
+    margin: 20px auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas: "creation"
+                         "creation"
+                         "search"
+                         "search"
+                         "result"
+                         "result";
+    grid-column-gap: 10px;
+    grid-row-gap: 15px;
+  }
+}
+
+
 .section-title {
   font-size: 21px;
   margin-bottom: 10px;
   font-weight: bold;
+}
+
+.section-checkbox {
+  margin-bottom: 5px;
 }
 
 .label-text {

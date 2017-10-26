@@ -7,7 +7,12 @@
       </div>
     </div>
     <div class="wanna-search">
-      <div class="section-title">Wanna Search <label class="label-text"><input type="checkbox" name="case-sensitive" v-model="isCaseSensitive">Case Sensitive</label></div>
+      <div class="section-title">Wanna Search</div>
+      <div class="section-checkbox">
+        <label class="label-text"><input type="checkbox" name="case-sensitive" v-model="isCaseSensitive">Case Sensitive</label>
+        <label class="label-text"><input type="checkbox" name="infinite-use" v-model="isInfiniteUse">Infinite Use</label>
+        <label class="label-text"><input type="checkbox" name="character-order-search" v-model="isCharacterOrderSearch">Character Order Search</label>
+      </div>
       <div class="section-content">
         <textarea class="type-area" v-default-value="'ABCE\nSFCS\nADEE'" v-model="wannaSearch" placeholder="type single|multiple words you wanna search (make sure that you use the LF between words)"></textarea>
       </div>
@@ -33,18 +38,34 @@ export default {
     return {
       wordCreation: '',
       wannaSearch: '',
-      isCaseSensitive: false
+      isCaseSensitive: false,
+      isInfiniteUse: false,
+      isCharacterOrderSearch: false
     }
   },
   computed: {
     computedWordCreation () {
-      return this.wordCreation.indexOf(SPLIT_CHARACTER) >= 0 ? this.wordCreation.split(SPLIT_CHARACTER).filter((value) => value.length) : [this.wordCreation]
+      let wordCreationArray = this.wordCreation.indexOf(SPLIT_CHARACTER) >= 0 ? this.wordCreation.split(SPLIT_CHARACTER).filter((value) => value.length) : [this.wordCreation]
+
+      return this.isCharacterOrderSearch ? wordCreationArray.map((value) => {
+        return value.split('')
+      }) : wordCreationArray
     },
     computedWannaSearch () {
       let wannaSearchArray = this.wannaSearch.indexOf(SPLIT_CHARACTER) >= 0 ? this.wannaSearch.split(SPLIT_CHARACTER).filter((value) => value.length) : [this.wannaSearch]
 
-      return wannaSearchArray.map((value) => {
+      return this.isCharacterOrderSearch ? wannaSearchArray.map((value) => {
         return value.split('')
+      }) : wannaSearchArray
+    },
+    resultArray () {
+      // let computedResultArray = []
+      // let usedWannaSearch = []
+
+      this.computedWordCreation.forEach((value) => {
+        // let computedWordItem = ''
+
+        // if (!this.isCaseSensitive) computedWordItem = value.toLowerCase()
       })
     }
   }
