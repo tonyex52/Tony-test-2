@@ -38,6 +38,7 @@ export default {
     return {
       wordCreation: '',
       wannaSearch: '',
+      usedWannaSearch: [],
       isCaseSensitive: false,
       isInfiniteUse: false,
       isCharacterOrderSearch: false
@@ -47,26 +48,98 @@ export default {
     computedWordCreation () {
       let wordCreationArray = this.wordCreation.indexOf(SPLIT_CHARACTER) >= 0 ? this.wordCreation.split(SPLIT_CHARACTER).filter((value) => value.length) : [this.wordCreation]
 
-      return this.isCharacterOrderSearch ? wordCreationArray.map((value) => {
-        return value.split('')
-      }) : wordCreationArray
+      return wordCreationArray.map((value) => {
+        let splitArray = value.split('')
+        let notOrderObject = {}
+
+        if (this.isCharacterOrderSearch) {
+          return splitArray
+        } else {
+          splitArray.forEach((character) => {
+            let convertCharacter = this.isCaseSensitive ? character : character.toLowerCase()
+
+            if (notOrderObject.hasOwnProperty(convertCharacter)) {
+              notOrderObject[convertCharacter]++
+            } else {
+              notOrderObject[convertCharacter] = 1
+            }
+          })
+          return notOrderObject
+        }
+      })
+    },
+    wannaSearchArray () {
+      return this.wannaSearch.indexOf(SPLIT_CHARACTER) >= 0 ? this.wannaSearch.split(SPLIT_CHARACTER).filter((value) => value.length) : [this.wannaSearch]
     },
     computedWannaSearch () {
-      let wannaSearchArray = this.wannaSearch.indexOf(SPLIT_CHARACTER) >= 0 ? this.wannaSearch.split(SPLIT_CHARACTER).filter((value) => value.length) : [this.wannaSearch]
+      return this.wannaSearchArray.map((value) => {
+        let splitArray = value.split('')
+        let notOrderObject = {}
 
-      return this.isCharacterOrderSearch ? wannaSearchArray.map((value) => {
-        return value.split('')
-      }) : wannaSearchArray
+        if (this.isCharacterOrderSearch) {
+          return splitArray
+        } else {
+          splitArray.forEach((character) => {
+            let convertCharacter = this.isCaseSensitive ? character : character.toLowerCase()
+
+            if (notOrderObject.hasOwnProperty(convertCharacter)) {
+              notOrderObject[convertCharacter]++
+            } else {
+              notOrderObject[convertCharacter] = 1
+            }
+          })
+          return notOrderObject
+        }
+      })
     },
     resultArray () {
-      // let computedResultArray = []
+      let computedResultArray = []
       // let usedWannaSearch = []
 
-      this.computedWordCreation.forEach((value) => {
-        // let computedWordItem = ''
-
-        // if (!this.isCaseSensitive) computedWordItem = value.toLowerCase()
+      this.computedWordCreation.forEach((item) => {
+        computedResultArray.push(this._isMatchWord(item))
       })
+
+      return computedResultArray
+    }
+  },
+  methods: {
+    _isMatchWord (wordItem) {
+      let isMatch = true
+      let matchStatus = 'FAIL'
+      if (this.isCharacterOrderSearch) {
+
+      } else {
+        this.computedWannaSearch.forEach((searchItem, searchIndex) => {
+          let searchItemString = this.wannaSearchArray[searchIndex]
+
+          Object.keys(searchItem).map((key) => {
+            if (wordItem.hasOwnProperty(key)) {
+              if (wordItem[key] < searchItem[key]) {
+                isMatch = false
+              }
+            } else {
+              isMatch = false
+            }
+          })
+
+          if (isMatch && !this.isInfiniteUse) {
+            if (this.usedWannaSearch.indexOf(searchItemString) < 0) {
+              matchStatus = 'OK'
+              this.usedWannaSearch.push(searchItemString)
+              return false
+            } else {
+              matchStatus = 'OVERLAP'
+              isMatch = false
+            }
+          } else if (isMatch && this.isInfiniteUse) {
+            matchStatus = 'OK'
+            return false
+          }
+        })
+      }
+
+      return {isMatch, matchStatus}
     }
   }
 }
