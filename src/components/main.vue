@@ -20,7 +20,11 @@
     <div class="result">
       <div class="section-title">result</div>
       <div class="section-content">
-
+        <template v-for="item in resultArray">
+          <p>
+            {{ item.wordItemName }} {{ item.status }} {{ item.matchWhich }}
+          </p>
+        </template>
       </div>
     </div>
   </div>
@@ -38,17 +42,20 @@ export default {
     return {
       wordCreation: '',
       wannaSearch: '',
-      usedWannaSearch: [],
       isCaseSensitive: false,
       isInfiniteUse: false,
       isCharacterOrderSearch: false
     }
   },
   computed: {
+    wordCreationArray () {
+      return this.wordCreation.indexOf(SPLIT_CHARACTER) >= 0 ? this.wordCreation.split(SPLIT_CHARACTER).filter((value) => value.length) : [this.wordCreation]
+    },
+    wordCreationArrayInCase () {
+      return this.wordCreationArray.map((value) => this.isCaseSensitive ? value : value.toLowerCase())
+    },
     computedWordCreation () {
-      let wordCreationArray = this.wordCreation.indexOf(SPLIT_CHARACTER) >= 0 ? this.wordCreation.split(SPLIT_CHARACTER).filter((value) => value.length) : [this.wordCreation]
-
-      return wordCreationArray.map((value) => {
+      return this.wordCreationArrayInCase.map((value) => {
         let splitArray = value.split('')
         let notOrderObject = {}
 
@@ -56,12 +63,10 @@ export default {
           return splitArray
         } else {
           splitArray.forEach((character) => {
-            let convertCharacter = this.isCaseSensitive ? character : character.toLowerCase()
-
-            if (notOrderObject.hasOwnProperty(convertCharacter)) {
-              notOrderObject[convertCharacter]++
+            if (notOrderObject.hasOwnProperty(character)) {
+              notOrderObject[character]++
             } else {
-              notOrderObject[convertCharacter] = 1
+              notOrderObject[character] = 1
             }
           })
           return notOrderObject
@@ -71,8 +76,11 @@ export default {
     wannaSearchArray () {
       return this.wannaSearch.indexOf(SPLIT_CHARACTER) >= 0 ? this.wannaSearch.split(SPLIT_CHARACTER).filter((value) => value.length) : [this.wannaSearch]
     },
+    wannaSearchArrayInCase () {
+      return this.wannaSearchArray.map((value) => this.isCaseSensitive ? value : value.toLowerCase())
+    },
     computedWannaSearch () {
-      return this.wannaSearchArray.map((value) => {
+      return this.wannaSearchArrayInCase.map((value) => {
         let splitArray = value.split('')
         let notOrderObject = {}
 
@@ -80,12 +88,10 @@ export default {
           return splitArray
         } else {
           splitArray.forEach((character) => {
-            let convertCharacter = this.isCaseSensitive ? character : character.toLowerCase()
-
-            if (notOrderObject.hasOwnProperty(convertCharacter)) {
-              notOrderObject[convertCharacter]++
+            if (notOrderObject.hasOwnProperty(character)) {
+              notOrderObject[character]++
             } else {
-              notOrderObject[convertCharacter] = 1
+              notOrderObject[character] = 1
             }
           })
           return notOrderObject
@@ -94,52 +100,79 @@ export default {
     },
     resultArray () {
       let computedResultArray = []
-      // let usedWannaSearch = []
+      let remainSearchArray = [].concat(this.wannaSearchArray)
 
-      this.computedWordCreation.forEach((item) => {
-        computedResultArray.push(this._isMatchWord(item))
+      this.computedWordCreation.forEach((wordItem, wordIndex) => {
+        let wordItemName = this.wordCreationArray[wordIndex]
+        let isMatch = false
+        let status
+        let matchWhich = ''
+
+        this.computedWannaSearch.some((searchItem, searchIndex) => {
+          if (this._isMatchWord(wordItem, searchItem)) {
+            let searchItemName = this.wannaSearchArray[searchIndex]
+            matchWhich = searchItemName
+
+            if (this.isInfiniteUse) {
+              isMatch = true
+              status = 'OK'
+              return true
+            } else {
+              let remainSearchIndex = remainSearchArray.indexOf(searchItemName)
+
+              if (remainSearchIndex >= 0) {
+                isMatch = true
+                status = 'OK'
+                remainSearchArray.splice(remainSearchIndex, 1)
+                return true
+              } else {
+                isMatch = true
+                status = 'OVERLAP'
+              }
+            }
+          } else if (status !== 'OVERLAP') {
+            isMatch = false
+            status = 'FAIL'
+            matchWhich = ''
+          }
+        })
+        computedResultArray.push({wordItemName, isMatch, status, matchWhich})
       })
 
       return computedResultArray
     }
   },
   methods: {
-    _isMatchWord (wordItem) {
+    _isMatchWord (wordItem, searchItem) {
       let isMatch = true
-      let matchStatus = 'FAIL'
+
       if (this.isCharacterOrderSearch) {
 
       } else {
-        this.computedWannaSearch.forEach((searchItem, searchIndex) => {
-          let searchItemString = this.wannaSearchArray[searchIndex]
-
-          Object.keys(searchItem).map((key) => {
-            if (wordItem.hasOwnProperty(key)) {
-              if (wordItem[key] < searchItem[key]) {
-                isMatch = false
-              }
-            } else {
+        Object.keys(searchItem).map((key) => {
+          if (wordItem.hasOwnProperty(key)) {
+            if (wordItem[key] < searchItem[key]) {
               isMatch = false
-            }
-          })
-
-          if (isMatch && !this.isInfiniteUse) {
-            if (this.usedWannaSearch.indexOf(searchItemString) < 0) {
-              matchStatus = 'OK'
-              this.usedWannaSearch.push(searchItemString)
               return false
-            } else {
-              matchStatus = 'OVERLAP'
-              isMatch = false
             }
-          } else if (isMatch && this.isInfiniteUse) {
-            matchStatus = 'OK'
+          } else {
+            isMatch = false
             return false
           }
         })
       }
 
-      return {isMatch, matchStatus}
+      return isMatch
+    }
+  },
+  watch: {
+    isInfiniteUse: {
+      immediate: true,
+      handler (val) {
+        if (val) {
+          this.usedWannaSearch = {}
+        }
+      }
     }
   }
 }
@@ -147,5 +180,6 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="less">
+  @import "../less/reset.less";
   @import "../less/main.less";
 </style>
