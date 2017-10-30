@@ -1,0 +1,26 @@
+.icon {
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+}
+
+.icon-small {
+  width: 12px;
+  height: 12px;
+}
+
+.icon-svg(@name, @color, @prefix) {
+  @svg: ~"../icon/@{name}.svg";
+  @data-uri: data-uri("image/svg+xml;charset=UTF-8", "@{svg}");
+  @replace-default: escape('<path ');
+  @replace-color: escape('<path fill="@{color}" ');
+  @escape-color: escape("@{color}");
+  @background-uri: replace("@{data-uri}", @replace-default, @replace-color, "g");
+
+  .@{prefix}-icon-@{name} {
+    background-image: e(@background-uri);
+  }
+}

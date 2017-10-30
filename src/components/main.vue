@@ -1,13 +1,13 @@
 <template>
   <div class="grid-container">
     <div class="word-creation">
-      <div class="section-title">Word Creation</div>
+      <div class="section-title">Context</div>
       <div class="section-content">
         <textarea class="type-area" v-default-value="'ASADB\nABCCED\nABCF'" v-model="wordCreation" placeholder="type single|multiple words which wanna be searched (make sure that you use the LF between words)"></textarea>
       </div>
     </div>
     <div class="wanna-search">
-      <div class="section-title">Wanna Search</div>
+      <div class="section-title">What Word You Want To Search</div>
       <div class="section-checkbox">
         <label class="label-text"><input type="checkbox" name="case-sensitive" v-model="isCaseSensitive">Case Sensitive</label>
         <label class="label-text"><input type="checkbox" name="infinite-use" v-model="isInfiniteUse">Infinite Use</label>
@@ -18,12 +18,33 @@
       </div>
     </div>
     <div class="result">
-      <div class="section-title">result</div>
+      <div class="section-title">result
+        <span>
+          <div class="section-sub-title">Match: <span class="icon main-icon-ok icon-small"></span></div>
+          <div class="section-sub-title">Overlap: <span class="icon main-icon-overlap icon-small"></span></div>
+          <div class="section-sub-title">Fail: <span class="icon main-icon-fail icon-small"></span></div>
+        </span>
+      </div>
       <div class="section-content">
+        <div class="flexbox">
+          <span class="flex-1">Context</span>
+          <span class="flex-1">Status</span>
+          <span class="flex-2">Match What Word</span>
+        </div>
         <template v-for="item in resultArray">
-          <p>
-            {{ item.wordItemName }} {{ item.status }} {{ item.matchWhich }}
-          </p>
+          <div class="flexbox">
+            <span class="flex-1">{{ item.wordItemName }}</span>
+            <span class="flex-1">
+              <span class="icon"
+                :class="{
+                  'main-icon-ok': item.status === 'OK',
+                  'main-icon-overlap': item.status === 'OVERLAP',
+                  'main-icon-fail': item.status === 'FAIL'
+                }">
+              </span>
+            </span>
+            <span class="flex-2">{{ item.matchWhich }}</span>
+          </div>
         </template>
       </div>
     </div>
@@ -147,17 +168,31 @@ export default {
       let isMatch = true
 
       if (this.isCharacterOrderSearch) {
+        let wordItemLength = wordItem.length
+        let searchItemLength = searchItem.length
+        let matchNum = 0
 
+        for (let wordIndex = 0, searchIndex = 0; searchIndex < searchItemLength && wordIndex < wordItemLength;) {
+          if (wordItem[wordIndex] === searchItem[searchIndex]) {
+            wordIndex++
+            searchIndex++
+            matchNum++
+          } else {
+            wordIndex++
+          }
+        }
+
+        if (matchNum !== searchItemLength) isMatch = false
       } else {
-        Object.keys(searchItem).map((key) => {
+        Object.keys(searchItem).some((key) => {
           if (wordItem.hasOwnProperty(key)) {
             if (wordItem[key] < searchItem[key]) {
               isMatch = false
-              return false
+              return true
             }
           } else {
             isMatch = false
-            return false
+            return true
           }
         })
       }
