@@ -173,7 +173,6 @@ export default {
           } else {
             status = 'OK'
           }
-          console.log(searchItem[searchIndex], top)
           if ((searchItemLength - 1) === searchIndex) {
             return status
           } else {
@@ -193,7 +192,6 @@ export default {
           } else {
             status = 'OK'
           }
-          console.log(searchItem[searchIndex], right)
           if ((searchItemLength - 1) === searchIndex) {
             return status
           } else {
@@ -213,7 +211,6 @@ export default {
           } else {
             status = 'OK'
           }
-          console.log(searchItem[searchIndex], down)
           if ((searchItemLength - 1) === searchIndex) {
             return status
           } else {
@@ -233,7 +230,6 @@ export default {
           } else {
             status = 'OK'
           }
-          console.log(searchItem[searchIndex], left)
           if ((searchItemLength - 1) === searchIndex) {
             return status
           } else {
