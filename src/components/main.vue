@@ -97,7 +97,6 @@ export default {
     },
     resultArray () {
       let computedResultArray = []
-
       this.computedWannaSearch.forEach((searchItem, searchIndex) => {
         let startPosition = this._findFirstCharacter(searchItem[0])
         let status
@@ -146,9 +145,9 @@ export default {
       return computed
     },
     _isMatchWord (searchItem, positionObj) {
-      let status
       let searchItemLength = searchItem.length
-      let traceArray = [].concat(this.tranceArrayStructure)
+      let traceArrayToString = JSON.stringify(this.tranceArrayStructure)
+      let self = this
 
       /**
        * DFS
@@ -156,29 +155,83 @@ export default {
        * @param {Number} searchIndex 要檢查searchCharacter的index
        * @param {[type]} traceArray  檢查重複
        */
-      function DFS (nowPosition, searchIndex, traceArray) {
+      function DFS (nowPosition, searchIndex, stringTraceArray, status) {
         let top = (nowPosition.x - 1) >= 0 ? {x: nowPosition.x - 1, y: nowPosition.y} : {}
-        let right = (this.computedContextMap[(nowPosition.x)][nowPosition.y + 1] !== undefined) ? {x: nowPosition.x, y: nowPosition.y + 1} : {}
-        let down = (this.computedContextMap[(nowPosition.x + 1)] !== undefined) ? {x: nowPosition.x + 1, y: nowPosition.y} : {}
+        let right = (self.computedContextMap[(nowPosition.x)][nowPosition.y + 1] !== undefined) ? {x: nowPosition.x, y: nowPosition.y + 1} : {}
+        let down = (self.computedContextMap[(nowPosition.x + 1)] !== undefined) ? {x: nowPosition.x + 1, y: nowPosition.y} : {}
         let left = (nowPosition.y - 1) >= 0 ? {x: nowPosition.x, y: nowPosition.y - 1} : {}
+        let traceArrayTemp = JSON.parse(stringTraceArray)
 
-        if (Object.keys(top).length && this.computedContextMap[top.x][top.y] === searchItem[searchIndex]) {
-          let traceArrayTemp = [].concat(traceArray)
-
-          if (!this.isInfiniteUse) {
-            if (traceArray[top.x][top.y]) {
+        if (Object.keys(top).length && self.computedContextMap[top.x][top.y] === searchItem[searchIndex]) {
+          if (!self.isInfiniteUse) {
+            if (traceArrayTemp[top.x][top.y]) {
               status = 'OVERLAP'
             } else {
               traceArrayTemp[top.x][top.y] = true
+              status = 'OK'
             }
+          } else {
+            status = 'OK'
           }
-          if ((searchItemLength - 1) === searchIndex)
+          if ((searchItemLength - 1) === searchIndex) {
+            return status
+          } else {
+            return DFS(top, ++searchIndex, JSON.stringify(traceArrayTemp), status)
+          }
+        } else if (Object.keys(right).length && self.computedContextMap[right.x][right.y] === searchItem[searchIndex]) {
+          if (!self.isInfiniteUse) {
+            if (traceArrayTemp[right.x][right.y]) {
+              status = 'OVERLAP'
+            } else {
+              traceArrayTemp[right.x][right.y] = true
+              status = 'OK'
+            }
+          } else {
+            status = 'OK'
+          }
+          if ((searchItemLength - 1) === searchIndex) {
+            return status
+          } else {
+            return DFS(right, ++searchIndex, JSON.stringify(traceArrayTemp), status)
+          }
+        } else if (Object.keys(down).length && self.computedContextMap[down.x][down.y] === searchItem[searchIndex]) {
+          if (!self.isInfiniteUse) {
+            if (traceArrayTemp[down.x][down.y]) {
+              status = 'OVERLAP'
+            } else {
+              traceArrayTemp[down.x][down.y] = true
+              status = 'OK'
+            }
+          } else {
+            status = 'OK'
+          }
+          if ((searchItemLength - 1) === searchIndex) {
+            return status
+          } else {
+            return DFS(down, ++searchIndex, JSON.stringify(traceArrayTemp), status)
+          }
+        } else if (Object.keys(left).length && self.computedContextMap[left.x][left.y] === searchItem[searchIndex]) {
+          if (!self.isInfiniteUse) {
+            if (traceArrayTemp[left.x][left.y]) {
+              status = 'OVERLAP'
+            } else {
+              traceArrayTemp[left.x][left.y] = true
+              status = 'OK'
+            }
+          } else {
+            status = 'OK'
+          }
+          if ((searchItemLength - 1) === searchIndex) {
+            return status
+          } else {
+            return DFS(left, ++searchIndex, JSON.stringify(traceArrayTemp), status)
+          }
+        } else {
+          return 'FAIL'
         }
       }
 
-      DFS(positionObj, 1, traceArray)
-
-      return status
+      return DFS(positionObj, 1, traceArrayToString, 'FAIL')
     }
   }
 }
