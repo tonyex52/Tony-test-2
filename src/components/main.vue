@@ -173,12 +173,16 @@ export default {
           } else {
             status = 'OK'
           }
+          console.log(searchItem[searchIndex], top)
           if ((searchItemLength - 1) === searchIndex) {
             return status
           } else {
-            return DFS(top, ++searchIndex, JSON.stringify(traceArrayTemp), status)
+            status = DFS(top, searchIndex + 1, JSON.stringify(traceArrayTemp), status)
+            if (status !== 'FAIL') return status
           }
-        } else if (Object.keys(right).length && self.computedContextMap[right.x][right.y] === searchItem[searchIndex]) {
+        }
+
+        if (Object.keys(right).length && self.computedContextMap[right.x][right.y] === searchItem[searchIndex]) {
           if (!self.isInfiniteUse) {
             if (traceArrayTemp[right.x][right.y]) {
               status = 'OVERLAP'
@@ -189,12 +193,16 @@ export default {
           } else {
             status = 'OK'
           }
+          console.log(searchItem[searchIndex], right)
           if ((searchItemLength - 1) === searchIndex) {
             return status
           } else {
-            return DFS(right, ++searchIndex, JSON.stringify(traceArrayTemp), status)
+            status = DFS(right, searchIndex + 1, JSON.stringify(traceArrayTemp), status)
+            if (status !== 'FAIL') return status
           }
-        } else if (Object.keys(down).length && self.computedContextMap[down.x][down.y] === searchItem[searchIndex]) {
+        }
+
+        if (Object.keys(down).length && self.computedContextMap[down.x][down.y] === searchItem[searchIndex]) {
           if (!self.isInfiniteUse) {
             if (traceArrayTemp[down.x][down.y]) {
               status = 'OVERLAP'
@@ -205,12 +213,16 @@ export default {
           } else {
             status = 'OK'
           }
+          console.log(searchItem[searchIndex], down)
           if ((searchItemLength - 1) === searchIndex) {
             return status
           } else {
-            return DFS(down, ++searchIndex, JSON.stringify(traceArrayTemp), status)
+            status = DFS(down, searchIndex + 1, JSON.stringify(traceArrayTemp), status)
+            if (status !== 'FAIL') return status
           }
-        } else if (Object.keys(left).length && self.computedContextMap[left.x][left.y] === searchItem[searchIndex]) {
+        }
+
+        if (Object.keys(left).length && self.computedContextMap[left.x][left.y] === searchItem[searchIndex]) {
           if (!self.isInfiniteUse) {
             if (traceArrayTemp[left.x][left.y]) {
               status = 'OVERLAP'
@@ -221,14 +233,16 @@ export default {
           } else {
             status = 'OK'
           }
+          console.log(searchItem[searchIndex], left)
           if ((searchItemLength - 1) === searchIndex) {
             return status
           } else {
-            return DFS(left, ++searchIndex, JSON.stringify(traceArrayTemp), status)
+            status = DFS(left, searchIndex + 1, JSON.stringify(traceArrayTemp), status)
+            if (status !== 'FAIL') return status
           }
-        } else {
-          return 'FAIL'
         }
+
+        return 'FAIL'
       }
 
       return DFS(positionObj, 1, traceArrayToString, 'FAIL')
