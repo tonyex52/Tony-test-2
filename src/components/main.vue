@@ -26,7 +26,7 @@
       </div>
       <div class="section-content">
         <div class="flexbox">
-          <span class="flex-1">Context</span>
+          <span class="flex-1">Search Context</span>
           <span class="flex-1">Status</span>
         </div>
         <template v-for="item in resultArray">
