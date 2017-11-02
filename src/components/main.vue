@@ -1,9 +1,9 @@
 <template>
   <div class="grid-container">
     <div class="word-creation">
-      <div class="section-title">Context</div>
+      <div class="section-title">Context Map</div>
       <div class="section-content">
-        <textarea class="type-area" v-default-value="'ASADB\nABCCED\nABCF'" v-model="wordCreation" placeholder="type single|multiple words which wanna be searched (make sure that you use the LF between words)"></textarea>
+        <textarea class="type-area" v-default-value="'A B C E\nS F C S\nA D E E'" v-model="contextMap" placeholder="type single|multiple words which wanna be searched (make sure that you use the LF between words)"></textarea>
       </div>
     </div>
     <div class="wanna-search">
@@ -11,10 +11,9 @@
       <div class="section-checkbox">
         <label class="label-text"><input type="checkbox" name="case-sensitive" v-model="isCaseSensitive">Case Sensitive</label>
         <label class="label-text"><input type="checkbox" name="infinite-use" v-model="isInfiniteUse">Infinite Use</label>
-        <label class="label-text"><input type="checkbox" name="character-order-search" v-model="isCharacterOrderSearch">Character Order Search</label>
       </div>
       <div class="section-content">
-        <textarea class="type-area" v-default-value="'ABCE\nSFCS\nADEE'" v-model="wannaSearch" placeholder="type single|multiple words you wanna search (make sure that you use the LF between words)"></textarea>
+        <textarea class="type-area" v-default-value="'ASADB\nABCCED\nABCF'" v-model="wannaSearch" placeholder="type single|multiple words you wanna search (make sure that you use the LF between words)"></textarea>
       </div>
     </div>
     <div class="result">
@@ -29,11 +28,10 @@
         <div class="flexbox">
           <span class="flex-1">Context</span>
           <span class="flex-1">Status</span>
-          <span class="flex-2">Match What Word</span>
         </div>
         <template v-for="item in resultArray">
           <div class="flexbox">
-            <span class="flex-1">{{ item.wordItemName }}</span>
+            <span class="flex-1">{{ item.searchItemName }}</span>
             <span class="flex-1">
               <span class="icon"
                 :class="{
@@ -43,7 +41,6 @@
                 }">
               </span>
             </span>
-            <span class="flex-2">{{ item.matchWhich }}</span>
           </div>
         </template>
       </div>
@@ -61,37 +58,22 @@ export default {
   name: 'main',
   data () {
     return {
-      wordCreation: '',
+      contextMap: '',
       wannaSearch: '',
       isCaseSensitive: false,
-      isInfiniteUse: false,
-      isCharacterOrderSearch: false
+      isInfiniteUse: false
     }
   },
   computed: {
-    wordCreationArray () {
-      return this.wordCreation.indexOf(SPLIT_CHARACTER) >= 0 ? this.wordCreation.split(SPLIT_CHARACTER).filter((value) => value.length) : [this.wordCreation]
+    contextMapArray () {
+      return this.contextMap.indexOf(SPLIT_CHARACTER) >= 0 ? this.contextMap.split(SPLIT_CHARACTER).filter((value) => value.length) : [this.contextMap]
     },
-    wordCreationArrayInCase () {
-      return this.wordCreationArray.map((value) => this.isCaseSensitive ? value : value.toLowerCase())
+    contextMapArrayInCase () {
+      return this.contextMapArray.map((value) => this.isCaseSensitive ? value : value.toLowerCase())
     },
-    computedWordCreation () {
-      return this.wordCreationArrayInCase.map((value) => {
-        let splitArray = value.split('')
-        let notOrderObject = {}
-
-        if (this.isCharacterOrderSearch) {
-          return splitArray
-        } else {
-          splitArray.forEach((character) => {
-            if (notOrderObject.hasOwnProperty(character)) {
-              notOrderObject[character]++
-            } else {
-              notOrderObject[character] = 1
-            }
-          })
-          return notOrderObject
-        }
+    computedContextMap () {
+      return this.contextMapArrayInCase.map((line) => {
+        return line.split(' ')
       })
     },
     wannaSearchArray () {
@@ -101,113 +83,102 @@ export default {
       return this.wannaSearchArray.map((value) => this.isCaseSensitive ? value : value.toLowerCase())
     },
     computedWannaSearch () {
-      return this.wannaSearchArrayInCase.map((value) => {
-        let splitArray = value.split('')
-        let notOrderObject = {}
-
-        if (this.isCharacterOrderSearch) {
-          return splitArray
-        } else {
-          splitArray.forEach((character) => {
-            if (notOrderObject.hasOwnProperty(character)) {
-              notOrderObject[character]++
-            } else {
-              notOrderObject[character] = 1
-            }
-          })
-          return notOrderObject
-        }
+      return this.wannaSearchArrayInCase.map((line) => {
+        return line.split('')
       })
+    },
+    tranceArrayStructure () {
+      let structure = []
+
+      this.computedContextMap.forEach((line) => {
+        structure.push(line.map(() => false))
+      })
+      return structure
     },
     resultArray () {
       let computedResultArray = []
-      let remainSearchArray = [].concat(this.wannaSearchArray)
 
-      this.computedWordCreation.forEach((wordItem, wordIndex) => {
-        let wordItemName = this.wordCreationArray[wordIndex]
-        let isMatch = false
+      this.computedWannaSearch.forEach((searchItem, searchIndex) => {
+        let startPosition = this._findFirstCharacter(searchItem[0])
         let status
-        let matchWhich = ''
 
-        this.computedWannaSearch.some((searchItem, searchIndex) => {
-          if (this._isMatchWord(wordItem, searchItem)) {
-            let searchItemName = this.wannaSearchArray[searchIndex]
-            matchWhich = searchItemName
+        if (startPosition.length > 0) {
+          startPosition.some((position) => {
+            let statusTemp = this._isMatchWord(searchItem, position)
 
-            if (this.isInfiniteUse) {
-              isMatch = true
-              status = 'OK'
+            if (statusTemp === 'OK') {
+              status = statusTemp
               return true
-            } else {
-              let remainSearchIndex = remainSearchArray.indexOf(searchItemName)
-
-              if (remainSearchIndex >= 0) {
-                isMatch = true
-                status = 'OK'
-                remainSearchArray.splice(remainSearchIndex, 1)
-                return true
-              } else {
-                isMatch = true
-                status = 'OVERLAP'
-              }
+            } else if (statusTemp === 'OVERLAP') {
+              status = statusTemp
+            } else if (status !== 'OVERLAP' && statusTemp === 'FAIL') {
+              status = statusTemp
             }
-          } else if (status !== 'OVERLAP') {
-            isMatch = false
-            status = 'FAIL'
-            matchWhich = ''
-          }
-        })
-        computedResultArray.push({wordItemName, isMatch, status, matchWhich})
+          })
+
+          computedResultArray.push({
+            'searchItemName': this.wannaSearchArray[searchIndex],
+            'status': status
+          })
+        } else {
+          computedResultArray.push({
+            'searchItemName': this.wannaSearchArray[searchIndex],
+            'status': 'FAIL'
+          })
+        }
       })
 
       return computedResultArray
     }
   },
   methods: {
-    _isMatchWord (wordItem, searchItem) {
-      let isMatch = true
+    _findFirstCharacter (firstCharacter) {
+      let computed = []
 
-      if (this.isCharacterOrderSearch) {
-        let wordItemLength = wordItem.length
-        let searchItemLength = searchItem.length
-        let matchNum = 0
-
-        for (let wordIndex = 0, searchIndex = 0; searchIndex < searchItemLength && wordIndex < wordItemLength;) {
-          if (wordItem[wordIndex] === searchItem[searchIndex]) {
-            wordIndex++
-            searchIndex++
-            matchNum++
-          } else {
-            wordIndex++
-          }
-        }
-
-        if (matchNum !== searchItemLength) isMatch = false
-      } else {
-        Object.keys(searchItem).some((key) => {
-          if (wordItem.hasOwnProperty(key)) {
-            if (wordItem[key] < searchItem[key]) {
-              isMatch = false
-              return true
-            }
-          } else {
-            isMatch = false
-            return true
+      this.computedContextMap.forEach((line, lineIndex) => {
+        line.forEach((character, characterIndex) => {
+          if (character === firstCharacter) {
+            computed.push({x: lineIndex, y: characterIndex})
           }
         })
-      }
+      })
 
-      return isMatch
-    }
-  },
-  watch: {
-    isInfiniteUse: {
-      immediate: true,
-      handler (val) {
-        if (val) {
-          this.usedWannaSearch = {}
+      return computed
+    },
+    _isMatchWord (searchItem, positionObj) {
+      let status
+      let searchItemLength = searchItem.length
+      let traceArray = [].concat(this.tranceArrayStructure)
+
+      /**
+       * DFS
+       * @param {Object} nowPosition 前一個match searchCharacter的MAP位置
+       * @param {Number} searchIndex 要檢查searchCharacter的index
+       * @param {[type]} traceArray  檢查重複
+       */
+      function DFS (nowPosition, searchIndex, traceArray) {
+        let top = (nowPosition.x - 1) >= 0 ? {x: nowPosition.x - 1, y: nowPosition.y} : {}
+        let right = (this.computedContextMap[(nowPosition.x)][nowPosition.y + 1] !== undefined) ? {x: nowPosition.x, y: nowPosition.y + 1} : {}
+        let down = (this.computedContextMap[(nowPosition.x + 1)] !== undefined) ? {x: nowPosition.x + 1, y: nowPosition.y} : {}
+        let left = (nowPosition.y - 1) >= 0 ? {x: nowPosition.x, y: nowPosition.y - 1} : {}
+
+        if (Object.keys(top).length && this.computedContextMap[top.x][top.y] === searchItem[searchIndex]) {
+          let traceArrayTemp = [].concat(traceArray)
+
+          if (!this.isInfiniteUse) {
+            if (traceArray[top.x][top.y]) {
+              status = 'OVERLAP'
+            } else {
+              traceArrayTemp[top.x][top.y] = true
+            }
+          }
+          if ((searchItemLength - 1) === searchIndex)
         }
       }
+
+      DFS(positionObj, 1, traceArray)
+
+      return status
     }
   }
 }
