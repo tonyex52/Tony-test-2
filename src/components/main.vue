@@ -168,7 +168,7 @@ export default {
               status = 'OVERLAP'
             } else {
               traceArrayTemp[top.x][top.y] = true
-              status = 'OK'
+              status = status === 'OVERLAP' ? status : 'OK'
             }
           } else {
             status = 'OK'
@@ -187,7 +187,7 @@ export default {
               status = 'OVERLAP'
             } else {
               traceArrayTemp[right.x][right.y] = true
-              status = 'OK'
+              status = status === 'OVERLAP' ? status : 'OK'
             }
           } else {
             status = 'OK'
@@ -206,7 +206,7 @@ export default {
               status = 'OVERLAP'
             } else {
               traceArrayTemp[down.x][down.y] = true
-              status = 'OK'
+              status = status === 'OVERLAP' ? status : 'OK'
             }
           } else {
             status = 'OK'
@@ -225,7 +225,7 @@ export default {
               status = 'OVERLAP'
             } else {
               traceArrayTemp[left.x][left.y] = true
-              status = 'OK'
+              status = status === 'OVERLAP' ? status : 'OK'
             }
           } else {
             status = 'OK'
